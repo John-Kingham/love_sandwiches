@@ -15,6 +15,35 @@ GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open("love_sandwiches")
 
 
+def update_sales():
+    """
+    Get data from user and update to worksheet.
+
+    Returns:
+        List[int]: User inputted row of sales data.
+    """
+    sales_data = get_sales_data()
+    update_worksheet(sales_data, "sales")
+    return sales_data
+
+
+def update_surplus(sales_data):
+    """
+    Calculate surplus and update to worksheet.
+
+    Args:
+        sales_data (List[int]): User inputted row of sales data.
+    """
+    update_worksheet(calculate_surplus_data(sales_data), "surplus")
+
+
+def update_stock():
+    """
+    Calculate latest stock requirement and update to worksheet.
+    """
+    update_worksheet(calculate_stock_data(), "stock")
+
+
 def get_sales_data():
     """Get valid sales figures from user.
 
@@ -90,21 +119,23 @@ def calculate_surplus_data(sales_row):
     return surplus_row
 
 
-def get_last_5_entries_sales():
+def get_last_5_sales_entries():
     """
-    Get the last 5 entries of sales data.
+    Get the last 5 sales entries for each sandwich type.
 
     Return:
         List[List[int]]: Each inner list contains the last 5 entries for a
-        sandwich type
+        sandwich type.
     """
     print("Getting recent sales for stock calculation...\n")
     sales = SHEET.worksheet("sales")
     last_5_entries = []
+    num_sandwich_types = 6
 
-    for i in range(1, 7):
-        last_5_str = sales.col_values(i)[-5:]
-        last_5_entries.append([int(data) for data in last_5_str])
+    for i in range(num_sandwich_types):
+        # note: col_values() is 1-based rather than 0-based
+        last_5_rows_str = sales.col_values(i + 1)[-5:]
+        last_5_entries.append([int(data) for data in last_5_rows_str])
     return last_5_entries
 
 
@@ -115,7 +146,7 @@ def calculate_stock_data():
         List[int]: The required stock amount for each sandwich type.
     """
     print("Calculating required stock levels...\n")
-    sales_data = get_last_5_entries_sales()
+    sales_data = get_last_5_sales_entries()
     stock_data = []
     margin_of_safety = 1.1
 
@@ -129,13 +160,12 @@ def main():
     """
     Run the Love Sandwiches program.
     """
-    print("Welcome to LOVE SANDWICHES DATA AUTOMATION.\n")
-    sales_data = get_sales_data()
-    update_worksheet(sales_data, "sales")
-    surplus_data = calculate_surplus_data(sales_data)
-    update_worksheet(surplus_data, "surplus")
-    stock_data = calculate_stock_data()
-    update_worksheet(stock_data, "stock")
+    print("LOVE SANDWICHES DATA AUTOMATION\n")
+
+    new_sales_data = update_sales()
+    update_surplus(new_sales_data)
+    update_stock()
+
     print("Love Sandwiches database updated successfully.\n")
 
 

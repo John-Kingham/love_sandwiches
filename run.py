@@ -16,10 +16,10 @@ SHEET = GSPREAD_CLIENT.open("love_sandwiches")
 
 
 def get_sales_data():
-    """Get valid sales figures from user
+    """Get valid sales figures from user.
 
     Returns:
-        List[int]: Validated sales data
+        List[int]: Validated sales data.
     """
     while True:
         print("Please enter sales data from the last market.")
@@ -36,10 +36,10 @@ def data_is_valid(values):
     """Validate that user entered 6 integers.
 
     Args:
-        values (List[str]): Values entered by user
+        values (List[str]): Values entered by user.
 
     Returns:
-        bool: True if user entered 6 integers, else False
+        bool: True if user entered 6 integers, else False.
     """
     try:
         [int(value) for value in values]
@@ -52,36 +52,24 @@ def data_is_valid(values):
         return False
 
 
-def update_sales_worksheet(data):
-    """Update sales spreadsheet with data from user
+def update_worksheet(data, name):
+    """Add a row of data to a worksheet.
 
     Args:
-        data (List[int]): Sandwich sales data from user
+        data (List[int]): A row of data.
+        name (str): Name of the worksheet.
     """
-    print("Updating sales worksheet...\n")
-    sales_worksheet = SHEET.worksheet("sales")
-    sales_worksheet.append_row(data)
-    print("Sales data updated successfully.\n")
-
-
-def update_surplus_data(data):
-    """Update surplus worksheet with calculated surplus values.
-
-    Args:
-        data (List[int]): A row of surplus amounts.
-    """
-    print("Updating surplus worksheet...\n")
-    surplus_sheet = SHEET.worksheet("surplus")
-    surplus_sheet.append_row(data)
-    print("Surplus data updated successfully.\n")
+    print(f"Updating {name} worksheet...\n")
+    SHEET.worksheet(name).append_row(data)
+    print(f"{name} data updated successfully.\n")
 
 
 def calculate_surplus_data(sales_row):
     """
     Compare sales with stock and calculate the surplus stock.
     The surplus is defined as sales minus stock:
-        - Positive surplus indicates waste
-        - Negative surplus indicates extra sandwiches had to be made
+        - Positive surplus indicates waste.
+        - Negative surplus indicates extra sandwiches had to be made.
 
     Args:
         sales_row (List[int]): Sales data for each sandwich type.
@@ -98,13 +86,13 @@ def calculate_surplus_data(sales_row):
 
 def main():
     """
-    Run the Love Sandwiches program
+    Run the Love Sandwiches program.
     """
     print("Welcome to LOVE SANDWICHES DATA AUTOMATION.\n")
     sales_data = get_sales_data()
-    update_sales_worksheet(sales_data)
+    update_worksheet(sales_data, "sales")
     surplus_data = calculate_surplus_data(sales_data)
-    update_surplus_data(surplus_data)
+    update_worksheet(surplus_data, "surplus")
 
 
 if __name__ == "__main__":

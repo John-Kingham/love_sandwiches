@@ -84,6 +84,30 @@ def calculate_surplus_data(sales_row):
     return surplus_row
 
 
+def calculate_stock_data():
+    """Calculate the amount of stock required for the next market.
+
+    Returns:
+        List[int]: The amount of stock per sandwich type.
+    """
+    get_last_5_entries_sales()
+
+
+def get_last_5_entries_sales():
+    """
+    Get the last 5 entries of sales data.
+
+    Return:
+        List[List[int]]: Each inner list contains the last 5 entries for a
+        sandwich type
+    """
+    sales = SHEET.worksheet("sales")
+    last_5_entries = []
+    for i in range(1, 7):
+        last_5_entries.append(sales.col_values(i)[-5:])
+    return last_5_entries
+
+
 def main():
     """
     Run the Love Sandwiches program.
@@ -93,6 +117,7 @@ def main():
     update_worksheet(sales_data, "sales")
     surplus_data = calculate_surplus_data(sales_data)
     update_worksheet(surplus_data, "surplus")
+    calculate_stock_data()
 
 
 if __name__ == "__main__":

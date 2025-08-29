@@ -22,14 +22,20 @@ def get_sales_data():
         List[int]: Validated sales data.
     """
     while True:
-        print("Please enter sales data from the last market.")
-        print("Data should be six numbers, separated by commas.")
-        print("Example: 10,20,30,40,50,60\n")
+        print_instructions()
         sales_data = input("Enter your data here: ").split(",")
         if data_is_valid(sales_data):
-            print("Data valid")
             break
     return [int(data) for data in sales_data]
+
+
+def print_instructions():
+    """
+    Show data entry instructions to user
+    """
+    print("Please enter sales data from the last market.")
+    print("Data should be six numbers, separated by commas.")
+    print("Example: 10,20,30,40,50,60\n")
 
 
 def data_is_valid(values):
@@ -61,7 +67,7 @@ def update_worksheet(data, name):
     """
     print(f"Updating {name} worksheet...\n")
     SHEET.worksheet(name).append_row(data)
-    print(f"{name} data updated successfully.\n")
+    print(f"{name} worksheet updated successfully.\n")
 
 
 def calculate_surplus_data(sales_row):
@@ -78,19 +84,10 @@ def calculate_surplus_data(sales_row):
     stock_row = SHEET.worksheet("stock").get_all_values()[-1]
     stock_row = [int(data) for data in stock_row]
     surplus_row = []
+
     for stock, sales in zip(stock_row, sales_row):
         surplus_row.append(stock - sales)
-    print(surplus_row)
     return surplus_row
-
-
-def calculate_stock_data():
-    """Calculate the amount of stock required for the next market.
-
-    Returns:
-        List[int]: The amount of stock per sandwich type.
-    """
-    get_last_5_entries_sales()
 
 
 def get_last_5_entries_sales():
@@ -101,11 +98,31 @@ def get_last_5_entries_sales():
         List[List[int]]: Each inner list contains the last 5 entries for a
         sandwich type
     """
+    print("Getting recent sales for stock calculation...\n")
     sales = SHEET.worksheet("sales")
     last_5_entries = []
+
     for i in range(1, 7):
-        last_5_entries.append(sales.col_values(i)[-5:])
+        last_5_str = sales.col_values(i)[-5:]
+        last_5_entries.append([int(data) for data in last_5_str])
     return last_5_entries
+
+
+def calculate_stock_data():
+    """Calculate the amount of stock required for the next market.
+
+    Returns:
+        List[int]: The required stock amount for each sandwich type.
+    """
+    print("Calculating required stock levels...\n")
+    sales_data = get_last_5_entries_sales()
+    stock_data = []
+    margin_of_safety = 1.1
+
+    for column in sales_data:
+        avg_sales = sum(column) / len(column)
+        stock_data.append(round(avg_sales * margin_of_safety))
+    return stock_data
 
 
 def main():
@@ -117,7 +134,9 @@ def main():
     update_worksheet(sales_data, "sales")
     surplus_data = calculate_surplus_data(sales_data)
     update_worksheet(surplus_data, "surplus")
-    calculate_stock_data()
+    stock_data = calculate_stock_data()
+    update_worksheet(stock_data, "stock")
+    print("Love Sandwiches database updated successfully.\n")
 
 
 if __name__ == "__main__":

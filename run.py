@@ -15,35 +15,6 @@ GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open("love_sandwiches")
 
 
-def update_sales():
-    """
-    Get data from user and update to worksheet.
-
-    Returns:
-        List[int]: User inputted row of sales data.
-    """
-    sales_data = get_sales_data()
-    update_worksheet(sales_data, "sales")
-    return sales_data
-
-
-def update_surplus(sales_data):
-    """
-    Calculate surplus and update to worksheet.
-
-    Args:
-        sales_data (List[int]): User inputted row of sales data.
-    """
-    update_worksheet(calculate_surplus_data(sales_data), "surplus")
-
-
-def update_stock():
-    """
-    Calculate latest stock requirement and update to worksheet.
-    """
-    update_worksheet(calculate_stock_data(), "stock")
-
-
 def get_sales_data():
     """Get valid sales figures from user.
 
@@ -87,12 +58,12 @@ def data_is_valid(values):
         return False
 
 
-def update_worksheet(data, name):
+def update_worksheet(name, data):
     """Add a row of data to a worksheet.
 
     Args:
-        data (List[int]): A row of data.
         name (str): Name of the worksheet.
+        data (List[int]): A row of data.
     """
     print(f"Updating {name} worksheet...\n")
     SHEET.worksheet(name).append_row(data)
@@ -162,9 +133,10 @@ def main():
     """
     print("LOVE SANDWICHES DATA AUTOMATION\n")
 
-    new_sales_data = update_sales()
-    update_surplus(new_sales_data)
-    update_stock()
+    sales_data = get_sales_data()
+    update_worksheet("sales", sales_data)
+    update_worksheet("surplus", calculate_surplus_data(sales_data))
+    update_worksheet("stock", calculate_stock_data())
 
     print("Love Sandwiches database updated successfully.\n")
 

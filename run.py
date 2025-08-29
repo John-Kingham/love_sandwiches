@@ -19,39 +19,37 @@ def get_sales_data():
     """Get valid sales figures from user
 
     Returns:
-        List[str]: Validated sales data
+        List[int]: Validated sales data
     """
     while True:
         print("Please enter sales data from the last market.")
         print("Data should be six numbers, separated by commas.")
         print("Example: 10,20,30,40,50,60\n")
-
-        data_str = input("Enter your data here: ")
-        sales_data = data_str.split(",")
-        if validate_data(sales_data):
+        sales_data = input("Enter your data here: ").split(",")
+        if data_is_valid(sales_data):
             print("Data valid")
             break
-    return sales_data
+    return [int(data) for data in sales_data]
 
 
-def validate_data(values):
-    """Validate that the user has entered 6 integers.
+def data_is_valid(values):
+    """Validate that user entered 6 integers.
 
     Args:
-        values (List[str]): Values entered by the user
+        values (List[str]): Values entered by user
 
     Returns:
-        bool: True if user entered 6 integers, otherwise False
+        bool: True if user entered 6 integers, else False
     """
     try:
         [int(value) for value in values]
         if len(values) != 6:
             msg = f"Exactly 6 values required, you provided {len(values)}"
             raise ValueError(msg)
+        return True
     except ValueError as e:
         print(f"Invalid data: {e}, please try again.\n")
         return False
-    return True
 
 
 def update_sales_worksheet(data):
@@ -66,6 +64,18 @@ def update_sales_worksheet(data):
     print("Sales data updated successfully.\n")
 
 
+def update_surplus_data(data):
+    """Update surplus worksheet with calculated surplus values.
+
+    Args:
+        data (List[int]): A row of surplus amounts.
+    """
+    print("Updating surplus worksheet...\n")
+    surplus_sheet = SHEET.worksheet("surplus")
+    surplus_sheet.append_row(data)
+    print("Surplus data updated successfully.\n")
+
+
 def calculate_surplus_data(sales_row):
     """
     Compare sales with stock and calculate the surplus stock.
@@ -78,9 +88,10 @@ def calculate_surplus_data(sales_row):
     """
     print("Calculating surplus data...\n")
     stock_row = SHEET.worksheet("stock").get_all_values()[-1]
+    stock_row = [int(data) for data in stock_row]
     surplus_row = []
     for stock, sales in zip(stock_row, sales_row):
-        surplus_row.append(int(stock) - sales)
+        surplus_row.append(stock - sales)
     print(surplus_row)
     return surplus_row
 
@@ -90,10 +101,10 @@ def main():
     Run the Love Sandwiches program
     """
     print("Welcome to LOVE SANDWICHES DATA AUTOMATION.\n")
-    data = get_sales_data()
-    sales_data = [int(num) for num in data]
+    sales_data = get_sales_data()
     update_sales_worksheet(sales_data)
-    calculate_surplus_data(sales_data)
+    surplus_data = calculate_surplus_data(sales_data)
+    update_surplus_data(surplus_data)
 
 
 if __name__ == "__main__":

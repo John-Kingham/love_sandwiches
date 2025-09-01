@@ -23,7 +23,7 @@ def get_sales_data():
     """
     while True:
         print_instructions()
-        sales_data = input("Enter your data here: ").split(",")
+        sales_data = input("Enter your data here:\n").split(",")
         if data_is_valid(sales_data):
             break
     return [int(data) for data in sales_data]

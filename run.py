@@ -127,6 +127,21 @@ def calculate_stock_data():
     return stock_data
 
 
+def get_stock_values(data):
+    """Returns a dictionary containing each type of sandwich and its required
+    stock.
+
+    Args:
+        data (List[int]): The required stock for each sandwich type.
+
+    Returns:
+        Dict[str, int]: A dictionary where the key is the sandwich type and the
+        value is the required stock
+    """
+    headings = SHEET.worksheet("stock").get_all_values()[0]
+    return {heading: stock for heading, stock in zip(headings, data)}
+
+
 def main():
     """
     Run the Love Sandwiches program.
@@ -136,9 +151,12 @@ def main():
     sales_data = get_sales_data()
     update_worksheet("sales", sales_data)
     update_worksheet("surplus", calculate_surplus_data(sales_data))
-    update_worksheet("stock", calculate_stock_data())
-
+    stock_data = calculate_stock_data()
+    update_worksheet("stock", stock_data)
+    stock_values = get_stock_values(stock_data)
     print("Love Sandwiches database updated successfully.\n")
+    print("Make the following numbers of sandwiches for the next market:\n")
+    print(stock_values)
 
 
 if __name__ == "__main__":
